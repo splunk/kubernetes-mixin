@@ -58,6 +58,9 @@
     // servers under some non-root path.
     grafanaPrefix: '',
 
+    //We'd like to allow users to opt-in to multiCluster dashboards (should default: false)
+    showMultiCluster: true,
+
     // This list of filesystem is referenced in various expressions.
     fstypes: ['ext[234]', 'btrfs', 'xfs', 'zfs'],
     fstypeSelector: 'fstype=~"%s"' % std.join('|', self.fstypes),
