@@ -6,7 +6,7 @@ local g = import 'grafana-builder/grafana.libsonnet';
       local legendLink = '%(prefix)s/d/%(uid)s/k8s-node-rsrc-use' % { prefix: $._config.grafanaPrefix, uid: std.md5('k8s-node-rsrc-use.json') };
 
       g.dashboard(
-        '%(grafanaDashboardNamePrefix)s USE Method / Cluster' % $._config,
+        '%(grafanaDashboardNamePrefix)sUSE Method / Cluster' % $._config,
         uid=($._config.grafanaDashboardIDs['k8s-cluster-rsrc-use.json']),
       ).addRow(
         g.row('CPU')
@@ -88,7 +88,7 @@ local g = import 'grafana-builder/grafana.libsonnet';
 
     'k8s-node-rsrc-use.json':
       g.dashboard(
-        '%(grafanaDashboardNamePrefix)s USE Method / Node' % $._config,
+        '%(grafanaDashboardNamePrefix)sUSE Method / Node' % $._config,
         uid=($._config.grafanaDashboardIDs['k8s-node-rsrc-use.json']),
       ).addTemplate('node', 'kube_node_info', 'node')
       .addRow(
