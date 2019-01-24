@@ -106,7 +106,7 @@ local g = import 'grafana-builder/grafana.libsonnet';
         namespace: {
           alias: 'Namespace',
           link: '%(prefix)s/d/%(uid)s/k8s-resources-namespace?var-datasource=$datasource&var-cluster=$cluster&var-namespace=$__cell' % { prefix: $._config.grafanaPrefix, uid: std.md5('k8s-resources-namespace.json') },
-        },        
+        },
       };
      
       g.dashboard(
