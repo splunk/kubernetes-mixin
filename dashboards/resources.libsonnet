@@ -4,7 +4,7 @@ local g = import 'grafana-builder/grafana.libsonnet';
   grafanaDashboards+:: {
     'k8s-resources-multicluster.json':
       local tableStyles = {
-        cluster: { //TODO: Does this need to be "%(clusterLabel)s" ??
+        [$._config.clusterLabel]: {
           alias: 'Cluster',
           link: '%(prefix)s/d/%(uid)s/k8s-resources-cluster?var-datasource=$datasource&var-cluster=$__cell' % { prefix: $._config.grafanaPrefix, uid: std.md5('k8s-resources-cluster.json') },
         },
