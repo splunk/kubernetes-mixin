@@ -9,7 +9,7 @@ local g = import 'grafana-builder/grafana.libsonnet';
           link: '%(prefix)s/d/%(uid)s/k8s-resources-cluster?var-datasource=$datasource&var-cluster=$__cell' % { prefix: $._config.grafanaPrefix, uid: std.md5('k8s-resources-cluster.json') },
         },
       };
-      
+
       g.dashboard(
         '%(grafanaDashboardNamePrefix)s  Compute Resources /  Multi-Cluster' % $._config,
         uid=($._config.grafanaDashboardIDs['k8s-resources-multicluster.json']),
@@ -108,6 +108,7 @@ local g = import 'grafana-builder/grafana.libsonnet';
           link: '%(prefix)s/d/%(uid)s/k8s-resources-namespace?var-datasource=$datasource&var-cluster=$cluster&var-namespace=$__cell' % { prefix: $._config.grafanaPrefix, uid: std.md5('k8s-resources-namespace.json') },
         },
       };
+
       g.dashboard(
         '%(grafanaDashboardNamePrefix)s Compute Resources / Cluster' % $._config,
         uid=($._config.grafanaDashboardIDs['k8s-resources-cluster.json']),
