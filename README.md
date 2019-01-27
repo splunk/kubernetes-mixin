@@ -119,6 +119,7 @@ kubernetes {
     cadvisorSelector: 'job="kubernetes-cadvisor"',
     nodeExporterSelector: 'job="kubernetes-node-exporter"',
     kubeletSelector: 'job="kubernetes-kubelet"',
+    grafanaDashboardNamePrefix: 'Mixin / ',
   },
 }
 ```
