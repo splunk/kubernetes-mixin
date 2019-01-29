@@ -177,7 +177,10 @@ local g = import 'grafana-builder/grafana.libsonnet';
         workload: {
           alias: 'Workload',
           link: '%(prefix)s/d/%(uid)s/k8s-resources-workload?var-datasource=$datasource&var-cluster=$cluster&var-namespace=$namespace&var-workload=$__cell' % { prefix: $._config.grafanaPrefix, uid: std.md5('k8s-resources-workload.json') },
-        }
+        },
+        workload_type: {
+          alias: 'Workload Type',
+        },
       };
 
       local cpuUsageQuery = |||
@@ -196,7 +199,7 @@ local g = import 'grafana-builder/grafana.libsonnet';
         ) by (workload)
       ||| % $._config;
 
-      local podCountQuery = 'count(mixin_pod_workload{%(clusterLabel)s="$cluster", namespace="$namespace"}) by (workload)' % $._config;
+      local podCountQuery = 'count(mixin_pod_workload{%(clusterLabel)s="$cluster", namespace="$namespace"}) by (workload, workload_type)' % $._config;
       local cpuLimitsQuery = std.strReplace(cpuRequestsQuery, 'requests', 'limits');
 
       local memUsageQuery = |||
