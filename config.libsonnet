@@ -10,7 +10,6 @@
     kubeControllerManagerSelector: 'job="kube-controller-manager"',
     kubeApiserverSelector: 'job="kube-apiserver"',
     podLabel: 'pod',
-    clusterLabel: 'cluster',
     namespaceSelector: null,
     prefixedNamespaceSelector: if self.namespaceSelector != null then self.namespaceSelector + ',' else '',
     hostNetworkInterfaceSelector: 'device="eth0"',
@@ -60,6 +59,7 @@
 
     //Opt-in to multiCluster dashboards by overriding this and the clusterLabel
     showMultiCluster: false,
+    clusterLabel: 'cluster',
 
     // This list of filesystem is referenced in various expressions.
     fstypes: ['ext[234]', 'btrfs', 'xfs', 'zfs'],
