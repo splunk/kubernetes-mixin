@@ -10,7 +10,6 @@
     kubeControllerManagerSelector: 'job="kube-controller-manager"',
     kubeApiserverSelector: 'job="kube-apiserver"',
     podLabel: 'pod',
-    clusterLabel: 'cluster',
     namespaceSelector: null,
     prefixedNamespaceSelector: if self.namespaceSelector != null then self.namespaceSelector + ',' else '',
     hostNetworkInterfaceSelector: 'device="eth0"',
@@ -58,8 +57,9 @@
     // servers under some non-root path.
     grafanaPrefix: '',
 
-    //We'd like to allow users to opt-in to multiCluster dashboards (should default: false)
-    showMultiCluster: true,
+    //Opt-in to multiCluster dashboards by overriding this and the clusterLabel
+    showMultiCluster: false,
+    clusterLabel: 'cluster',
 
     // This list of filesystem is referenced in various expressions.
     fstypes: ['ext[234]', 'btrfs', 'xfs', 'zfs'],
