@@ -1,33 +1,4 @@
 {
-  _deploymentWorkloadAggregation(innerQuery):: |||
-    sum(
-      label_replace(
-        label_replace(
-          %(innerQuery)s
-            * on(pod_name) group_left(owner_name)
-            label_replace(kube_pod_owner{%(kubeStateMetricsSelector)s, owner_kind="ReplicaSet"}, "pod_name", "$1", "pod", "(.*)"),
-          "replicaset", "$1", "owner_name", "(.*)"
-        ) * on(replicaset) group_left(owner_name) kube_replicaset_owner{%(kubeStateMetricsSelector)s},
-        "workload", "$1", "owner_name", "(.*)"
-      )
-    ) by (namespace, workload, pod_name)
-  ||| % ($._config { innerQuery: innerQuery }),
-
-  _singleLevelWorkloadAggregation(innerQuery, kind):: |||
-    sum(
-      label_replace(
-        label_replace(
-          %(innerQuery)s
-            * on(pod_name) group_left(owner_name)
-            label_replace(kube_pod_owner{%(kubeStateMetricsSelector)s, owner_kind="%(kind)s"}, "pod_name", "$1", "pod", "(.*)"),
-          "replicaset", "$1", "owner_name", "(.*)"
-        ),
-        "workload", "$1", "owner_name", "(.*)"
-      )
-    ) by (namespace, workload, pod_name)
-  ||| % ($._config { innerQuery: innerQuery, kind: kind }),
-
-
   prometheusRules+:: {
     groups+: [
       {
@@ -98,45 +69,46 @@
           },
           // workload aggregation for deployments
           {
-            record: 'namespace_workload_pod_name:container_cpu_usage_seconds_total:sum_rate',
-            expr: $._deploymentWorkloadAggregation('namespace_pod_name_container_name:container_cpu_usage_seconds_total:sum_rate'),
+            record: 'mixin_pod_workload',
+            expr: |||
+              sum(
+                label_replace(
+                  label_replace(
+                    kube_pod_owner{%(kubeStateMetricsSelector)s, owner_kind="ReplicaSet"},
+                    "replicaset", "$1", "owner_name", "(.*)"
+                  ) * on(replicaset) group_left(owner_name) kube_replicaset_owner{%(kubeStateMetricsSelector)s},
+                  "workload", "$1", "owner_name", "(.*)"
+                )
+              ) by (namespace, workload, pod)
+            ||| % $._config,
             labels: {
               workload_type: 'deployment',
             },
           },
           {
-            record: 'namespace_workload_pod_name:container_memory_usage_bytes:sum',
-            expr: $._deploymentWorkloadAggregation('sum(container_memory_usage_bytes{%(cadvisorSelector)s,image!="", container_name!=""}) by (pod_name, namespace)' % $._config),
-            labels: {
-              workload_type: 'deployment',
-            },
-          },
-          // workload aggregation for daemonsets
-          {
-            record: 'namespace_workload_pod_name:container_cpu_usage_seconds_total:sum_rate',
-            expr: $._singleLevelWorkloadAggregation('namespace_pod_name_container_name:container_cpu_usage_seconds_total:sum_rate', 'DaemonSet'),
-            labels: {
-              workload_type: 'daemonset',
-            },
-          },
-          {
-            record: 'namespace_workload_pod_name:container_memory_usage_bytes:sum',
-            expr: $._singleLevelWorkloadAggregation('sum(container_memory_usage_bytes{%(cadvisorSelector)s,image!="", container_name!=""}) by (pod_name, namespace)' % $._config, 'DaemonSet'),
+            record: 'mixin_pod_workload',
+            expr: |||
+              sum(
+                label_replace(
+                  kube_pod_owner{%(kubeStateMetricsSelector)s, owner_kind="DaemonSet"},
+                  "workload", "$1", "owner_name", "(.*)"
+                )
+              ) by (namespace, workload, pod)
+            ||| % $._config,
             labels: {
               workload_type: 'daemonset',
             },
           },
-          // workload aggregation for statefulsets
           {
-            record: 'namespace_workload_pod_name:container_cpu_usage_seconds_total:sum_rate',
-            expr: $._singleLevelWorkloadAggregation('namespace_pod_name_container_name:container_cpu_usage_seconds_total:sum_rate', 'StatefulSet'),
-            labels: {
-              workload_type: 'statefulset',
-            },
-          },
-          {
-            record: 'namespace_workload_pod_name:container_memory_usage_bytes:sum',
-            expr: $._singleLevelWorkloadAggregation('sum(container_memory_usage_bytes{%(cadvisorSelector)s,image!="", container_name!=""}) by (pod_name, namespace)' % $._config, 'StatefulSet'),
+            record: 'mixin_pod_workload',
+            expr: |||
+              sum(
+                label_replace(
+                  kube_pod_owner{%(kubeStateMetricsSelector)s, owner_kind="StatefulSet"},
+                  "workload", "$1", "owner_name", "(.*)"
+                )
+              ) by (namespace, workload, pod)
+            ||| % $._config,
             labels: {
               workload_type: 'statefulset',
             },
