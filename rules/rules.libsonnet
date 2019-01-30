@@ -67,6 +67,52 @@
               )
             ||| % $._config,
           },
+          // workload aggregation for deployments
+          {
+            record: 'mixin_pod_workload',
+            expr: |||
+              sum(
+                label_replace(
+                  label_replace(
+                    kube_pod_owner{%(kubeStateMetricsSelector)s, owner_kind="ReplicaSet"},
+                    "replicaset", "$1", "owner_name", "(.*)"
+                  ) * on(replicaset) group_left(owner_name) kube_replicaset_owner{%(kubeStateMetricsSelector)s},
+                  "workload", "$1", "owner_name", "(.*)"
+                )
+              ) by (namespace, workload, pod)
+            ||| % $._config,
+            labels: {
+              workload_type: 'deployment',
+            },
+          },
+          {
+            record: 'mixin_pod_workload',
+            expr: |||
+              sum(
+                label_replace(
+                  kube_pod_owner{%(kubeStateMetricsSelector)s, owner_kind="DaemonSet"},
+                  "workload", "$1", "owner_name", "(.*)"
+                )
+              ) by (namespace, workload, pod)
+            ||| % $._config,
+            labels: {
+              workload_type: 'daemonset',
+            },
+          },
+          {
+            record: 'mixin_pod_workload',
+            expr: |||
+              sum(
+                label_replace(
+                  kube_pod_owner{%(kubeStateMetricsSelector)s, owner_kind="StatefulSet"},
+                  "workload", "$1", "owner_name", "(.*)"
+                )
+              ) by (namespace, workload, pod)
+            ||| % $._config,
+            labels: {
+              workload_type: 'statefulset',
+            },
+          },
         ],
       },
       {
@@ -373,19 +419,19 @@
             ||| % $._config,
           },
           {
-              record: 'node:node_inodes_free:',
-              expr: |||
+            record: 'node:node_inodes_free:',
+            expr: |||
+              max(
                 max(
-                  max(
-                    kube_pod_info{%(kubeStateMetricsSelector)s, host_ip!=""}
-                  ) by (node, host_ip)
-                  * on (host_ip) group_right (node)
-                  label_replace(
-                    (max(node_filesystem_files_free{%(nodeExporterSelector)s, %(hostMountpointSelector)s}) by (instance)), "host_ip", "$1", "instance", "(.*):.*"
-                  )
-                ) by (node)
-              ||| % $._config,
-          },          
+                  kube_pod_info{%(kubeStateMetricsSelector)s, host_ip!=""}
+                ) by (node, host_ip)
+                * on (host_ip) group_right (node)
+                label_replace(
+                  (max(node_filesystem_files_free{%(nodeExporterSelector)s, %(hostMountpointSelector)s}) by (instance)), "host_ip", "$1", "instance", "(.*):.*"
+                )
+              ) by (node)
+            ||| % $._config,
+          },
         ],
       },
     ],
